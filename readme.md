@@ -35,3 +35,14 @@ By using this tool, development using NEM by PHP becomes easy.
 詳しい使い方は、*example/example.php* をご覧ください。
 
 For detailed usage, please see *example/example.php*.
+
+## Author
+**tomotomo9696**
+
+twitter : [@tomotomo_9696](https://twitter.com/tomotomo_9696)
+
+*Donation*
+
+NEM : `NAUFIPHWAAFJWLE5C33WW36SI5BVDV32ODLFDFBK`
+
+BTC : `1Q6xVG5CCrxabgovc2abmhw5rihbvSGKVg`
