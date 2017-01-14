@@ -1,6 +1,32 @@
 <?php
 require_once ("./Sha3.php");
 require_once ("./salt/autoload.php");
+class Base32 {
+   private static $map = array('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',  'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '2', '3', '4', '5', '6', '7', '=');
+
+    public static function encode($input, $padding = true) {
+        if(empty($input)) return "";
+        $input = str_split($input);
+        $binaryString = "";
+        for($i = 0; $i < count($input); $i++) {
+            $binaryString .= str_pad(base_convert(ord($input[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
+        }
+        $fiveBitBinaryArray = str_split($binaryString, 5);
+        $base32 = "";
+        $i=0;
+        while($i < count($fiveBitBinaryArray)) {
+            $base32 .= self::$map[base_convert(str_pad($fiveBitBinaryArray[$i], 5,'0'), 2, 10)];
+            $i++;
+        }
+        if($padding && ($x = strlen($binaryString) % 40) != 0) {
+            if($x == 8) $base32 .= str_repeat(self::$map[32], 6);
+            else if($x == 16) $base32 .= str_repeat(self::$map[32], 4);
+            else if($x == 24) $base32 .= str_repeat(self::$map[32], 3);
+            else if($x == 32) $base32 .= self::$map[32];
+        }
+        return $base32;
+    }
+}
 class KeyPair {
     private $binaryPrivate = '';
     private $binaryPublic = '';
@@ -37,6 +63,15 @@ class KeyPair {
         $result = new FieldElement(32);
         $ed->GeExtendedtoBytes($result, $R);
         $this->binaryPublic = pack("C*", ...$result->toArray());
+    }
+    private function calcAddress() {
+        $sha3Hash = Sha3::keccakhash($this->binaryPublic, 256, true);
+        $ripemd160Hash = hash("ripemd160", $sha3Hash, true);
+        $withNetworkByte = hex2bin("68") . $ripemd160Hash;
+        $sha3HashWithNetworkByte = Sha3::keccakhash($withNetworkByte, 256, true);
+        $checkSum = substr($sha3HashWithNetworkByte, 0, 4);
+        $withCheckSum = $withNetworkByte . $checkSum;
+        return Base32::encode($withCheckSum);
     }
     public function fixPrivateKey($privkey) {
         $privkey = "0000000000000000000000000000000000000000000000000000000000000000" . preg_replace("/^00/i", "", $privkey);
@@ -75,6 +110,12 @@ class KeyPair {
             return false;
         }
         return $this->binaryPublic;
+    }
+    public function getAddress() {
+        if ($this->Failed) {
+            return false;
+        }
+        return $this->calcAddress();
     }
     public function sign($data) {
         if ($this->Failed) {

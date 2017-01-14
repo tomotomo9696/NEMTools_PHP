@@ -6,13 +6,13 @@ require_once("../NEMToolsLoadAll.php");
 HEXの他に、バイナリ文字列、バイト配列に対応しています。
 
 Create keypair.
-Currently, it does not support creating addresses.
 */
 $kp = new KeyPair("2b01f02cfb32d2909cb3b9eca1420f92e02473426ea93b368f117e8514f564a6");
 echo $kp->getHexPrivate() . PHP_EOL;
 echo $kp->getHexPublic() . PHP_EOL;
 echo $kp->getBinaryPrivate() . PHP_EOL;
 echo $kp->getBinaryPrivate() . PHP_EOL;
+echo $kp->getAddress() . PHP_EOL;
 
 $message = "Test message.";
 $hexmessage = bin2hex($message);
